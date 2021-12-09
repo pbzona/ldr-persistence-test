@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  redis:
+    image: redis
+    command: redis-server --save 60 1
+    volumes:
+      - ${REDIS_DATA_DIR}:/data
+    ports:
+      - "6379:6379"
+  ldrelay:
+    image: launchdarkly/ld-relay
+    volumes:
+      - ${RELAY_DATA_DIR}:/ldr
+    ports:
+      - "8030:8030"
+    environment:
+      PORT: 8030
+    depends_on:
+      - redis
+      - proxy-to-redis
+  proxy-to-redis:
+    image: alpine/socat
+    command: "tcp-listen:6380,reuseaddr,fork tcp-connect:redis:6379"
+    ports:
+      - "6380:6380"
+    depends_on:
+      - redis
+  proxy-to-ldrelay:
+    image: alpine/socat
+    command: "tcp-listen:8031,reuseaddr,fork tcp-connect:ldrelay:8030"
+    ports:
+      - "8031:8031"
+    depends_on:
+      - ldrelay
