@@ -18,6 +18,7 @@ services:
     depends_on:
       - redis
       - proxy-to-redis
+      - proxy-to-launchdarkly
   proxy-to-redis:
     image: alpine/socat
     command: "tcp-listen:6380,reuseaddr,fork tcp-connect:redis:6379"
@@ -32,3 +33,7 @@ services:
       - "8031:8031"
     depends_on:
       - ldrelay
+  proxy-to-launchdarkly:
+    image: travix/tinyproxy
+    ports:
+      - "8888:8888"
