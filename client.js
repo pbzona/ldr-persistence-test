@@ -40,6 +40,7 @@ const main = async () => {
 
     // Print any updates
     client.on('update', () => {
+      console.log('===================');
       printFlags();
     });
 
