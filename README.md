@@ -46,7 +46,7 @@ To simulate a failed connection between Relay Proxy and Redis, the process is al
 
 Stopping this container will prevent Relay Proxy from connecting to the Redis instance as long as it is down. You can also start it back up to restore the connection.
 
-## Relay Proxy/LD connectivity
+### Relay Proxy/LD connectivity
 
 The Relay Proxy, by default, will connect to LaunchDarkly via a proxy container called `proxy-to-launchdarkly`. You can simulate broken connections in much the same way as the previous sections - stop that container.
 
