@@ -2,9 +2,11 @@
 
 This project is a simple setup for testing the LaunchDarkly Relay Proxy with a persistent data store, specifically scenarios dealing with network errors.
 
+It can also be used to simulate connectivity issues between Relay and LaunchDarkly.
+
 ## Overview
 
-The Docker compose file includes 4 containers: a Relay Proxy, a Redis instance, and two proxies that can be used to simulate network issues at different layers of the network.
+The Docker compose file includes 5 containers: a Relay Proxy, a Redis instance, and three proxies that can be used to simulate issues at different layers of the network.
 
 There is also a simple NodeJS script that acts as an SDK client. It logs flag details to the console upon initialization as well as on every update.
 
@@ -24,7 +26,7 @@ There is also a simple NodeJS script that acts as an SDK client. It logs flag de
 ### Node Client
 
 1. Install dependencies with `npm install`
-2. Connect to the Relay Proxy by running `node index.js http://localhost:8030`. In this command, the URL argument is used by the SDK to configure its streaming and base URIs.
+2. Connect to the Relay Proxy by running `node client.js http://localhost:8030`. In this command, the URL argument is used by the SDK to configure its streaming and base URIs.
 
 ## Simulating Network Errors
 
@@ -33,7 +35,7 @@ There is also a simple NodeJS script that acts as an SDK client. It logs flag de
 Instead of connecting directly to the Relay Proxy, you can simulate a client connectivity issue by connecting to the proxy between the client and Relay:
 
 ```
-node index.js http://localhost:8031
+node client.js http://localhost:8031
 ```
 
 To cut off the connection, stop the running container for the `proxy-to-ldrelay` service. You can find this by running `docker container ls` and finding the container with `proxy-to-ldrelay` in its name. Stop it with `docker stop <container name>`.
@@ -43,3 +45,13 @@ To cut off the connection, stop the running container for the `proxy-to-ldrelay`
 To simulate a failed connection between Relay Proxy and Redis, the process is almost identical. The only difference is the container to stop will be the one corresponding to the `proxy-to-redis` service.
 
 Stopping this container will prevent Relay Proxy from connecting to the Redis instance as long as it is down. You can also start it back up to restore the connection.
+
+## Relay Proxy/LD connectivity
+
+The Relay Proxy, by default, will connect to LaunchDarkly via a proxy container called `proxy-to-launchdarkly`. You can simulate broken connections in much the same way as the previous sections - stop that container.
+
+This operation can be illustrative of a few scenarios:
+
+1. LaunchDarkly is down
+2. The user's network is unable to connect to LaunchDarkly for some other reason
+3. Transient network errors that can potentially have cascading effects, depending on what else happens at the same time
