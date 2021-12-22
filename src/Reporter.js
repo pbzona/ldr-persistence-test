@@ -1,16 +1,6 @@
 const chalk = require('chalk');
 const Table = require('cli-table');
-// What to show:
-//   Initial state
-//   Updates: 
-//   - only updates
-//   - every n seconds
-//   Timeline view
-//   - only updates
-//   - every n seconds
-// Print modes
-// - raw (JSON.stringify)
-// - pretty (formatted as report)
+const format = require('date-fns/format');
 
 class Reporter {
   constructor(client, user, options) {
@@ -22,11 +12,18 @@ class Reporter {
     this._prevState = {};
     this._currentState = {}
     this._defaultValue = chalk.bold.red('<DEFAULT>');
+
+    this._initTime = new Date();
+    this._currentTime = new Date();
+    this._prevTime = null;
   }
 
   async getAllFlagsState(isInitialRequest) {
     const allFlags = await this._client.allFlagsState(this._user, { withReasons: true });
     const flags = allFlags.allValues();
+
+    this._prevTime = isInitialRequest ? null : this._currentTime;
+    this._currentTime = new Date();
 
     this._initialState = isInitialRequest ? flags : this._initialState;
     this._prevState = this._currentState;
@@ -50,16 +47,19 @@ class Reporter {
     console.clear();
 
     console.log(heading('\nINITIAL FLAG STATE'));
+    console.log(this._fmtTime(this._initTime));
     this._divider();
     console.log(await this._getFlagReport(this._initialState));
     this._addSpace();
 
     console.log(heading('PREVIOUS FLAG STATE'));
+    console.log(this._fmtTime(this._prevTime));
     this._divider();
     console.log(await this._getFlagReport(this._prevState));
     this._addSpace();
 
     console.log(heading('CURRENT FLAG STATE'));
+    console.log(this._fmtTime(this._currentTime));
     this._divider();
     console.log(await this._getFlagReport(this._currentState));
     this._addSpace();
@@ -109,11 +109,20 @@ class Reporter {
   }
 
   _divider() {
-    console.log('=======================');
+    console.log('===========================================');
   }
 
   _addSpace() {
     console.log('\n');
+  }
+
+  _fmtTime(date) {
+    if (date !== null) {
+      const datetime = format(date, 'MMM d yyyy @ hh:mm:ss');
+      return `Updated at: ${datetime}`;
+    } else {
+      return '';
+    }
   }
 }
 
