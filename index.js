@@ -1,4 +1,5 @@
 require('dotenv').config();
+const Reporter = require('./src/Reporter');
 const relayHost = process.argv[2];
 
 // Client setup
@@ -17,31 +18,19 @@ const ldUser = {
   anonymous: true
 }
 
-const printFlags = async () => {
-  let allFlags = await client.allFlagsState(ldUser, { withReasons: true });
-
-  printDetails(allFlags.allValues());
-}
-
-const printDetails = async (flagObj) => {
-  const keys = Object.keys(flagObj);
-
-  for (key of keys) {
-    let variation = await client.variationDetail(key, ldUser, false);
-    console.log(key.toUpperCase() + '\n' + JSON.stringify(variation));
-  }
-}
+// Set up new Reporter
+const reporter = new Reporter(client, ldUser)
 
 // Listen for flag changes
 const main = async () => {
   try {
     await client.waitForInitialization();
-    printFlags();
+    await reporter.getAllFlagsState(true);
+    reporter.printFullReport();
 
     // Print any updates
     client.on('update', () => {
-      console.log('===================');
-      printFlags();
+      reporter.updateReport();
     });
 
   } catch (err) {
