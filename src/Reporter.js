@@ -3,10 +3,10 @@ const Table = require('cli-table');
 const format = require('date-fns/format');
 
 class Reporter {
-  constructor(client, user, options) {
+  constructor(client, user, host) {
     this._client = client;
     this._user = user;
-    this._options = options;
+    this._host = host;
 
     this._initialState = {};
     this._prevState = {};
@@ -45,6 +45,8 @@ class Reporter {
   async printFullReport() {
     const heading = chalk.bold.white;
     console.clear();
+
+    console.log(chalk.yellow(`\nConnected to: ${this._host || 'https://stream.launchdarkly.com'}`));
 
     console.log(heading('\nINITIAL FLAG STATE'));
     console.log(this._fmtTime(this._initTime));

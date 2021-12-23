@@ -7,7 +7,8 @@ const LaunchDarkly = require('launchdarkly-node-server-sdk');
 
 const config = {
   baseUri: relayHost,
-  streamUri: relayHost
+  streamUri: relayHost,
+  logger: LaunchDarkly.basicLogger({ level: 'none' }),
 }
 
 const client = LaunchDarkly.init(process.env.LD_SDK_KEY, config);
@@ -19,7 +20,7 @@ const ldUser = {
 }
 
 // Set up new Reporter
-const reporter = new Reporter(client, ldUser)
+const reporter = new Reporter(client, ldUser, relayHost);
 
 // Listen for flag changes
 const main = async () => {
